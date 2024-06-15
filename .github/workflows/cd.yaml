@@ -31,7 +31,7 @@ jobs:
         run: terraform init -backend-config="key=${{ github.ref_name }}/terraform.tfstate"
 
       - name: Terraform plan
-        run: terraform plan
+        run: TF_VAR_environment="${{ github.ref_name }}" terraform plan
 
       - name: Terraform apply
         run: TF_VAR_environment="${{ github.ref_name }}" terraform apply -auto-approve
