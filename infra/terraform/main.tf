@@ -24,6 +24,7 @@ resource "aws_s3_bucket_public_access_block" "example" {
 }
 
 resource "aws_s3_bucket_policy" "allow_access_from_another_account" {
+  depends_on = [ aws_s3_bucket_public_access_block.example  ]
   bucket = aws_s3_bucket.example.id
   policy = data.aws_iam_policy_document.allow_access_from_another_account.json
 }
@@ -72,6 +73,14 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     cached_methods = ["GET", "HEAD", "OPTIONS"]
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = aws_s3_bucket.example.bucket_regional_domain_name
+
+    forwarded_values {
+      query_string = false
+
+      cookies {
+        forward = "none"
+      }
+    }
   }
 
   restrictions {
