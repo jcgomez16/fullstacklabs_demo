@@ -62,4 +62,4 @@ jobs:
         run: npm run build
 
       - name: Deploy app
-        run: aws s3 cp ./build/ s3://${{ github.ref_name }}--fsl-cgomez --recursive
+        run: aws s3 cp ./build/ s3://${{ github.ref_name }}-fsl-cgomez --recursive
