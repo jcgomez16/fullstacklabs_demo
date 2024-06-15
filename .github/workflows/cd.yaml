@@ -34,7 +34,7 @@ jobs:
         run: terraform plan
 
       - name: Terraform apply
-        run: terraform apply -auto-approve
+        run: TF_VAR_environment="${{ github.ref_name }}" terraform apply -auto-approve
 
   deploy_app:
     needs: [deploy_infra]
