@@ -1,0 +1,66 @@
+name: Deploy
+
+on:
+  pull_request:
+  # push:
+  #   branches:
+  #     - devel
+  #     - stage
+  #     - prod
+
+jobs:
+  deploy_infra:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra/terraform
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+
+      - name: terraform init
+        run: terraform init -backend-config="key=dev/terraform.tfstate"
+      
+      - name: terraform plan
+        run: terraform plan
+      
+      - name: terraform apply
+        run: terraform apply -auto-approve
+
+  deploy_app:
+    needs: [deploy_infra]
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2      
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 15.0.1
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy app
+        run: aws s3 cp ./build/ s3://dev-fsl-cgomez --recursive
