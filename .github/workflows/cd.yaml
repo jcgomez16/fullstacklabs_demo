@@ -32,10 +32,10 @@ jobs:
         run: terraform init -backend-config="key=dev/terraform.tfstate"
       
       - name: terraform plan
-        run: terraform plan
+        run: TF_VAR_environment="dev" terraform plan
       
       - name: terraform apply
-        run: terraform apply -auto-approve
+        run: TF_VAR_environment="dev" terraform apply -auto-approve
 
   deploy_app:
     needs: [deploy_infra]
