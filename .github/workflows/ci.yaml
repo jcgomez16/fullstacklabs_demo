@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 15.0.1
+      
+      - name: Install
+        run: npm install
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Formatter
+        run: npm install -g prettier && npm run prettier
+
+      - name: Test
+        run: CI=true npm run test
+      
+      - name: Build
+        run: npm run build
